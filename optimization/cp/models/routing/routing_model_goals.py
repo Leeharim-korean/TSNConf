@@ -8,7 +8,7 @@ def add_optimization_goal_plus_load_balancing(model, existing_routes):
     # let the route length dominate over the load balancing with alpha=1000
     # max route length + 10 * max amount of overlaps
     upper_bound_stream_cost = model.max_node_int + 10 * (model.max_stream_int * model.max_node_int)
-    upper_bound_es_cost = model.ES_capacity[-1]._IntVar__var.domain._values[-1] # get upper bound of ES_capacity variable = 1000
+    upper_bound_es_cost = 1000  # upper bound of ES_capacity variable (defined in routing_model_variables.py)
 
     alpha = upper_bound_es_cost
     beta = 1

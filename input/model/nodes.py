@@ -7,6 +7,9 @@ from enum import Enum
 class node:
     id: str
 
+    def __hash__(self):
+        return hash(self.id)
+
     def __repr__(self):
         return "[{}]".format(self.id)
 
@@ -19,6 +22,9 @@ class end_system(node):
     max_utilization: float
     wcet_factor: float
     type: str
+
+    def __hash__(self):
+        return hash(self.id)
 
     def __repr__(self):
         return "[{}]".format(self.id)
@@ -64,6 +70,9 @@ class end_system(node):
 
 @dataclass()
 class switch(node):
+    def __hash__(self):
+        return hash(self.id)
+
     def __repr__(self):
         return "[{}]".format(self.id)
 

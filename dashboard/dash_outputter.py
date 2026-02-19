@@ -534,7 +534,7 @@ def run(solution: Solution, PORT=None):
 
     if PORT is None:
         PORT = 8050
-    app.run_server(port=PORT)
+    app.run(port=PORT)
 
 
 if __name__ == "__main__":

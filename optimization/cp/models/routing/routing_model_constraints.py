@@ -21,10 +21,26 @@ def add_constraints(model, redundancy, allow_overlap):
             )
 
             # bools: node v is receiver ES of f
-            model.model.Add(v_int == model.m_t[list(f.receiver_task_ids.keys())[0]]).OnlyEnforceIf(v_is_f_rcvr)
-            model.model.Add(v_int != model.m_t[list(f.receiver_task_ids.keys())[0]]).OnlyEnforceIf(
-                v_is_f_rcvr.Not()
-            ) # TODO: Support multicast
+            receiver_task_ids = list(f.receiver_task_ids.keys())
+            if len(receiver_task_ids) == 1:
+                model.model.Add(v_int == model.m_t[receiver_task_ids[0]]).OnlyEnforceIf(v_is_f_rcvr)
+                model.model.Add(v_int != model.m_t[receiver_task_ids[0]]).OnlyEnforceIf(
+                    v_is_f_rcvr.Not()
+                )
+            else:
+                # Multicast: v is a receiver if v matches ANY receiver task's ES
+                rcvr_match_bools = []
+                for r_task_id in receiver_task_ids:
+                    b = model.model.NewBoolVar(f"v{v_int}_is_rcvr_{f_int}_via_{r_task_id}")
+                    model.model.Add(v_int == model.m_t[r_task_id]).OnlyEnforceIf(b)
+                    model.model.Add(v_int != model.m_t[r_task_id]).OnlyEnforceIf(b.Not())
+                    rcvr_match_bools.append(b)
+                # v_is_f_rcvr <=> OR(rcvr_match_bools)
+                # Forward: any match => v_is_f_rcvr (contrapositive: NOT v_is_f_rcvr => NOT b_i)
+                for b in rcvr_match_bools:
+                    model.model.AddImplication(b, v_is_f_rcvr)
+                # Backward: v_is_f_rcvr => at least one match
+                model.model.AddBoolOr(rcvr_match_bools).OnlyEnforceIf(v_is_f_rcvr)
 
     for f_int in range(model.max_stream_int):
         for v_int in range(model.max_node_int):
@@ -265,7 +281,7 @@ def add_constraints(model, redundancy, allow_overlap):
                                 ).OnlyEnforceIf(
                                     model.x_v_has_successor[f_2_int][v_int]
                                 ).OnlyEnforceIf(
-                                    model.v_is_f_sender[f_int][v_int].Not()
+                                    model.f_sender_is_v[f_int][v_int].Not()
                                 )
 
     # Constraint 7.2: Streams may not exceed link capacity (upper bound is implicit through link_capacity domain)

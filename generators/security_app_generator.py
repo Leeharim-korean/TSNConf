@@ -47,6 +47,7 @@ def run(tc: Testcase, timing_object: TimingData) -> Testcase:
                                 tc.Pint,
                                 0,
                                 ETaskType.KEY_RELEASE,
+                                [],
                             )
 
                             key_stream = stream(
@@ -78,6 +79,7 @@ def run(tc: Testcase, timing_object: TimingData) -> Testcase:
                                 tc.Pint,
                                 0,
                                 ETaskType.KEY_VERIFICATION,
+                                [],
                                 src_es_id,
                             )
 
